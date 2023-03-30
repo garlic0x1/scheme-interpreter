@@ -1,4 +1,4 @@
-use crate::evaluator::*;
+use crate::{value::*, environment::Environment};
 use anyhow::{anyhow, Result};
 use edn_rs::Edn;
 use maplit::hashmap;
@@ -44,7 +44,7 @@ pub fn core() -> HashMap<Edn, Value> {
     // };
     // let apply: Procedure = Box::new(|input: &[Value]| -> Resut<Value>)
 
-    let lambda: Procedure = Box::new(|input: &[Value]| -> Result<Value> {
+    let lambda = Native::new(|input: &[Value], _env: &mut Environment| -> Result<Value> {
         if let (Some(first), Some(rest)) = (input.get(0), input.get(1)) {
             if let (Value::Expr(args), Value::Expr(body)) = (first, rest) {
                 if let Edn::Vector(args) = args.clone() {
@@ -58,26 +58,21 @@ pub fn core() -> HashMap<Edn, Value> {
         Err(anyhow!("Invalid args"))
     });
 
-    let display: Procedure = Box::new(|input: &[Value]| -> Result<Value> {
-        for arg in input {
+    let println = Native::new(|input: &[Value], _env: &mut Environment| -> Result<Value> {
+        dbg!("gothere");
+        if let Some(arg) = input.first() {
             match arg {
-                Value::Proc(_) => {
-                    print!("proc");
-                },
-                Value::Lambda(l) => {
-                    print!("{:?}", l);
-                },
-                Value::Expr(e) => {
-                    print!("{}", e.to_string());
-                },
+                Value::Native(_) => println!("#native"),
+                Value::Lambda(l) => println!("{:?}", l),
+                Value::Expr(e) => println!("{}", e.to_string()),
             }
         }
         Ok(Value::Expr(Edn::Nil))
     });
 
     hashmap! {
-        Edn::Symbol(str!("display")) => Value::Proc(display),
-        Edn::Symbol(str!("lambda")) => Value::Proc(lambda),
+        Edn::Symbol(str!("println")) => Value::Native(println),
+        Edn::Symbol(str!("lambda")) => Value::Native(lambda),
         // Edn::Symbol(str!("cons")) => Value::Proc(cons),
         // Edn::Symbol(str!("car"))  => Value::Proc(car),
         // Edn::Symbol(str!("cdr"))  => Value::Proc(cdr),
