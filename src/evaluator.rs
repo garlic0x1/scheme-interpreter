@@ -3,11 +3,8 @@ use edn_rs::Edn;
 use crate::{environment::Environment, value::Value};
 
 fn special(expr: &Edn) -> bool {
-    if expr.to_string() == "lambda".to_string() {
-        true
-    } else {
-        false
-    }
+    let specials = ["lambda", "define"];
+    specials.contains(&expr.to_string().as_str())
 }
 
 fn handle_recur(list: &edn_rs::List, env: &mut Environment) -> Result<Vec<Value>> {

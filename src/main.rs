@@ -13,12 +13,13 @@ use std::str::FromStr;
 
 fn repl() -> Result<()> {
     let pipe = std::io::stdin();
+    let mut env = Environment::from_frame(core());
     let repl = pipe
         .lines()
         .filter_map(|x| x.ok())
         .map(|line| Edn::from_str(&line))
         .filter_map(|x| x.ok())
-        .map(|edn| evaluate(&edn, &mut Environment::from_frame(core())))
+        .map(|edn| evaluate(&edn, &mut env))
         .filter_map(|res| res.ok())
         .map(|res| {println!("{:?}", &res); res})
         .collect::<Vec<Value>>();

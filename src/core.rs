@@ -1,5 +1,5 @@
 use crate::{value::*, environment::Environment};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Result, bail};
 use edn_rs::Edn;
 use maplit::hashmap;
 use std::collections::HashMap;
@@ -44,6 +44,28 @@ pub fn core() -> HashMap<Edn, Value> {
     // };
     // let apply: Procedure = Box::new(|input: &[Value]| -> Resut<Value>)
 
+    let define = Native::new(|input: &[Value], env: &mut Environment| -> Result<Value> {
+        dbg!("gothere", input);
+        if input.len() % 2 != 0 {
+            dbg!("Must provide even args");
+            bail!("Must provide even args");
+        }
+
+        input.iter()
+            .enumerate()
+            .filter(|x| x.0 % 2 == 0)
+            .filter_map(|(i, key)| if let (Some(val), Value::Expr(key)) = (input.get(i + 1), key) {
+                Some((key, val))
+            } else {
+                None
+            })
+            .for_each(|(key, val)| {
+                env.define(key, val);
+            });
+        dbg!(env);
+        Ok(Value::Expr(Edn::Nil))
+    });
+
     let lambda = Native::new(|input: &[Value], _env: &mut Environment| -> Result<Value> {
         if let (Some(first), Some(rest)) = (input.get(0), input.get(1)) {
             if let (Value::Expr(args), Value::Expr(body)) = (first, rest) {
@@ -72,6 +94,7 @@ pub fn core() -> HashMap<Edn, Value> {
     hashmap! {
         Edn::Symbol(str!("println")) => Value::Native(println),
         Edn::Symbol(str!("lambda")) => Value::Native(lambda),
+        Edn::Symbol(str!("define")) => Value::Native(define),
         // Edn::Symbol(str!("cons")) => Value::Proc(cons),
         // Edn::Symbol(str!("car"))  => Value::Proc(car),
         // Edn::Symbol(str!("cdr"))  => Value::Proc(cdr),
