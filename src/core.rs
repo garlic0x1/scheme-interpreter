@@ -59,7 +59,6 @@ pub fn core() -> HashMap<Edn, Value> {
     });
 
     let println = Native::new(|input: &[Value], _env: &mut Environment| -> Result<Value> {
-        dbg!("gothere");
         if let Some(arg) = input.first() {
             match arg {
                 Value::Native(_) => println!("#native"),

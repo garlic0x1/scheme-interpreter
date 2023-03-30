@@ -7,7 +7,7 @@ pub mod parser;
 use anyhow::Result;
 use environment::*;
 use evaluator::*;
-use crate::core::core;
+use crate::{core::core, value::Value};
 use edn_rs::{self, Edn};
 use std::str::FromStr;
 
@@ -20,14 +20,13 @@ fn repl() -> Result<()> {
         .filter_map(|x| x.ok())
         .map(|edn| evaluate(&edn, &mut Environment::from_frame(core())))
         .filter_map(|res| res.ok())
-        .map(|res| {println!("{:?}", &res); 0})
-        .collect::<Vec<i32>>();
+        .map(|res| {println!("{:?}", &res); res})
+        .collect::<Vec<Value>>();
     println!("{:?}", repl);
     Ok(())
 }
 
 fn main() -> Result<()> {
-    //test()?;
     repl()?;
     Ok(())
 }
