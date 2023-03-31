@@ -16,7 +16,7 @@ pub struct Environment {
 
 impl Environment {
     pub fn new(stack: Stack, global: Frame, macros: MacroTable) -> Self {Self{stack, global, macros}}
-    pub fn from_frame(core: Frame) -> Self {Environment::new(vec![], core, hashmap!{})}
+    pub fn from_core(core: Frame) -> Self {Environment::new(vec![], core, hashmap!{})}
 
     pub fn get(&self, edn: &Edn) -> Option<Value> {
         if let Some(stack) = self.stack.iter().rev().filter_map(|f| f.get(edn)).next() {

@@ -7,5 +7,8 @@ edition = "2021"
 
 [dependencies]
 edn-rs = "0.17.4"
+# edn-derive = "*"
+# serde = { version = "*", features = ["derive"] }
+# serde_edn = "*"
 anyhow = "*"
 maplit = "*"

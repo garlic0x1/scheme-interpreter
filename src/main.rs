@@ -13,13 +13,15 @@ use std::str::FromStr;
 
 fn repl() -> Result<()> {
     let pipe = std::io::stdin();
-    let mut env = Environment::from_frame(core());
+
+    let mut eval = Evaluator::from_core(core());
+
     let repl = pipe
         .lines()
         .filter_map(|x| x.ok())
         .map(|line| Edn::from_str(&line))
         .filter_map(|x| x.ok())
-        .map(|edn| evaluate(&edn, &mut env))
+        .map(|edn| eval.eval(&edn))
         .filter_map(|res| res.ok())
         .map(|res| {println!("{:?}", &res); res})
         .collect::<Vec<Value>>();
@@ -31,3 +33,4 @@ fn main() -> Result<()> {
     repl()?;
     Ok(())
 }
+// (define hello (lambda [name] (println (str "hello " name))))
