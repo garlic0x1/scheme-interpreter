@@ -51,7 +51,7 @@ impl Evaluator {
         if let Some(val) = self.env.get(sym) {
             return Ok(val)
         }
-        bail!("{} is not defined", sym.to_string())
+        Ok(Value::Expr(Edn::Nil))
     }
 
     pub fn eval(&mut self, expr: &Edn) -> Result<Value> {

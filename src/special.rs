@@ -65,7 +65,7 @@ fn def(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
 }
 
 fn if_statement(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
-    if let (Some(pred), Some(then), Some(otherwise)) = (input.get(0), input.get(1), input.get(3)) {
+    if let (Some(pred), Some(then), Some(otherwise)) = (input.get(0), input.get(1), input.get(2)) {
         if let Value::Expr(edn) = env.eval(pred)? {
             match edn {
                 Edn::Nil => return env.eval(otherwise),

@@ -36,4 +36,3 @@ async fn main() -> Result<()> {
     repl().await?;
     Ok(())
 }
-// (define hello (lambda [name] (println (str "hello " name))))

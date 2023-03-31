@@ -2,7 +2,7 @@ use crate::{value::*, evaluator::Evaluator};
 use anyhow::{anyhow, Result, bail};
 use edn_rs::Edn;
 use maplit::hashmap;
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 #[macro_export]
 macro_rules! str {
@@ -99,6 +99,14 @@ fn eval_lisp(input: &[Value], env: &mut Evaluator) -> Result<Value> {
     bail!("Bad input {:?}", input);
 }
 
+fn read_lisp(input: &[Value], env: &mut Evaluator) -> Result<Value> {
+    if let Some(Value::Expr(Edn::Str(lisp))) = input.first() {
+        let edn = Edn::from_str(&lisp)?;
+        return Ok(Value::Expr(edn))
+    }
+    bail!("Bad input {:?}", input);
+}
+
 pub fn core() -> HashMap<String, Value> {
     let wrap = |it| Value::Native(Native::new(it));
     hashmap! {
@@ -106,6 +114,7 @@ pub fn core() -> HashMap<String, Value> {
         str!("car")        => wrap(car),
         str!("cdr")        => wrap(cdr),
         str!("eval")       => wrap(eval_lisp),
+        str!("read-str")   => wrap(read_lisp),
         str!("slurp")      => wrap(slurp),
         str!("println")    => wrap(print_line),
         str!("str-append") => wrap(str_append),

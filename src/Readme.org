@@ -1,0 +1,55 @@
+#+title: Readme
+
+Scheme interpreter
+
+* Usage
+the app evaluates lines from stdin
+
+to run a file, use something like this
+#+begin_src edn
+(eval (read-str (str-append "(do " (slurp "/home/garlic/rust/scheme/test.scm") ")")))
+#+end_src
+
+if you evaluate the test.scm you will have access to the `load-file` function which does the same as the above expression
+#+begin_src clojure
+(load-file  "/home/garlic/rust/scheme/test.scm")
+#+end_src
+* Implemented
+A list of what is done
+** special forms:
+- lambda
+  Create an anonymous function
+  #+begin_src clj
+  (lambda [x] (println x))
+  #+end_src
+- def
+  Define in global namespace
+  #+begin_src clj
+  (def x "var")
+  #+end_src
+- if
+  If statement, returns branch
+  #+begin_src clj
+  (if not-nil? then else)
+  #+end_src
+- do
+  Evaluate multiple exprs, return last
+  #+begin_src clj
+  (do (println "1") (println "2"))
+  #+end_src
+- quote
+  Return list without evaluating
+  #+begin_src clj
+  (quote (1 2 3))
+  #+end_src
+** native fns:
+- cons
+- car
+- cdr
+- eval
+- read-str
+  parse string into edn
+- slurp
+  read file to string
+- println
+- str-append
