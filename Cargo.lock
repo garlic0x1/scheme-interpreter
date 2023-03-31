@@ -163,7 +163,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "scheme"
+name = "scheme-interpreter"
 version = "0.1.0"
 dependencies = [
  "anyhow",

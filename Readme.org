@@ -2,10 +2,17 @@
 
 Scheme interpreter
 
+* Installation
+build from source
+#+begin_src bash
+git clone https://github.com/garlic0x1/scheme-interpreter.git
+cd scheme-interpreter
+cargo install --path .
+#+end_src
 * Usage
 the app evaluates lines from stdin
 
-to run a file, use something like this
+to run a file, start the repl and use something like this
 #+begin_src clj
 lisp> (eval (read-str (str-append "(do " (slurp "/home/garlic/rust/scheme/test.scm") ")")))
 #+end_src
