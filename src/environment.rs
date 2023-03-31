@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use edn_rs::Edn;
 use maplit::hashmap;
-use crate::{value::Value, macros::Macro};
+use crate::{value::Value, macros::Macro, special::{special_forms, Special}};
 
-pub type Frame = HashMap<Edn, Value>;
+pub type Frame = HashMap<String, Value>;
 pub type Stack = Vec<Frame>;
 pub type MacroTable = HashMap<Edn, Macro>;
 
@@ -11,17 +11,35 @@ pub type MacroTable = HashMap<Edn, Macro>;
 pub struct Environment {
     stack:  Stack,
     global: Frame,
+    special: HashMap<String, Special>,
     macros: MacroTable,
 }
 
 impl Environment {
-    pub fn new(stack: Stack, global: Frame, macros: MacroTable) -> Self {Self{stack, global, macros}}
-    pub fn from_core(core: Frame) -> Self {Environment::new(vec![], core, hashmap!{})}
+    pub fn new(stack: Stack, global: Frame, macros: MacroTable) -> Self {
+        let special = special_forms();
+        Self{stack, global, special, macros}
+    }
 
-    pub fn get(&self, edn: &Edn) -> Option<Value> {
-        if let Some(stack) = self.stack.iter().rev().filter_map(|f| f.get(edn)).next() {
+    pub fn from_core(core: Frame) -> Self {
+        Environment::new(vec![], core, hashmap!{})
+    }
+
+    pub fn get_special(&self, name: &String) -> Option<Special> {
+        if let Some(res) = self.special.get(name) {
+            Some(res.clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn get(&self, name: &String) -> Option<Value> {
+        if let Some(stack) = self.stack
+                                 .iter()
+                                 .rev()
+                                 .find_map(|f| f.get(name)) {
             Some(stack.clone())
-        } else if let Some(global) = self.global.get(edn) {
+        } else if let Some(global) = self.global.get(name) {
             Some(global.clone())
         } else {
             None
@@ -32,13 +50,13 @@ impl Environment {
         self.stack.push(
             vars.iter()
                 .zip(args.iter())
-                .map(|(key, val)| (key.clone(), val.clone()))
-                .collect::<HashMap<Edn, Value>>());
+                .map(|(key, val)| (key.to_string(), val.clone()))
+                .collect::<HashMap<String, Value>>());
     }
 
     pub fn lambda_pop(&mut self) -> Option<Frame> {self.stack.pop()}
 
-    pub fn define(&mut self, key: &Edn, val: &Value) {
+    pub fn define(&mut self, key: &String, val: &Value) {
         self.global.insert(key.clone(), val.clone());
     }
 

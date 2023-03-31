@@ -10,5 +10,7 @@ edn-rs = "0.17.4"
 # edn-derive = "*"
 # serde = { version = "*", features = ["derive"] }
 # serde_edn = "*"
+tokio = { version = "1", features = ["full"] }
+cons-list = "*"
 anyhow = "*"
 maplit = "*"

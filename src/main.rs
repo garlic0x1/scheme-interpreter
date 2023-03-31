@@ -1,17 +1,19 @@
 pub mod core;
+pub mod special;
 pub mod value;
 pub mod environment;
 pub mod macros;
 pub mod evaluator;
 pub mod parser;
 use anyhow::Result;
-use environment::*;
 use evaluator::*;
 use crate::{core::core, value::Value};
 use edn_rs::{self, Edn};
 use std::str::FromStr;
 
-fn repl() -> Result<()> {
+// crude repl for testing
+// input must be one line
+async fn repl() -> Result<()> {
     let pipe = std::io::stdin();
 
     let mut eval = Evaluator::from_core(core());
@@ -29,8 +31,9 @@ fn repl() -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
-    repl()?;
+#[tokio::main]
+async fn main() -> Result<()> {
+    repl().await?;
     Ok(())
 }
 // (define hello (lambda [name] (println (str "hello " name))))

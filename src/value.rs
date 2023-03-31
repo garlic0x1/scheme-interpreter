@@ -2,7 +2,7 @@ use std::fmt;
 use anyhow::Result;
 use edn_rs::Edn;
 
-use crate::{environment::Environment, evaluator::Evaluator};
+use crate::evaluator::Evaluator;
 
 #[derive(Clone, Debug)]
 pub enum Value {
