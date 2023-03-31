@@ -33,6 +33,7 @@ pub fn special_forms() -> HashMap<String, Special> {
         str!("if")     => wrap(if_statement),
         str!("do")     => wrap(progn),
         str!("quote")  => wrap(quote),
+        str!("eval")   => wrap(eval_lisp),
     }
 }
 
@@ -89,4 +90,13 @@ fn progn(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
         res = env.eval(expr)?;
     }
     Ok(res)
+}
+
+fn eval_lisp(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
+    if let Some(lisp) = input.first() {
+        if let Value::Expr(edn) = env.eval(lisp)? {
+            return env.eval(&edn);
+        }
+    }
+    bail!("Bad input {:?}", input);
 }

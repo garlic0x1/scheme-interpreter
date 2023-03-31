@@ -14,23 +14,13 @@ macro_rules! str {
     };
 }
 
-#[macro_export]
-macro_rules! r#box {
-    () => {
-        Box::new()
-    };
-    ($x:expr $(,)?) => {
-        Box::new($x)
-    };
-}
-
 fn slurp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
-        if let Some(Value::Expr(Edn::Str(filename))) = input.first() {
-            let text = std::fs::read_to_string(filename)?;
-            Ok(Value::Expr(Edn::Str(text)))
-        } else {
-            Err(anyhow!("Bad input {:?}", input))
-        }
+    if let Some(Value::Expr(Edn::Str(filename))) = input.first() {
+        let text = std::fs::read_to_string(filename)?;
+        Ok(Value::Expr(Edn::Str(text)))
+    } else {
+        Err(anyhow!("Bad input {:?}", input))
+    }
 }
 
 fn cons(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
@@ -92,14 +82,7 @@ fn print_line(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     Ok(Value::Expr(Edn::Nil))
 }
 
-fn eval_lisp(input: &[Value], env: &mut Evaluator) -> Result<Value> {
-    if let Some(Value::Expr(lisp)) = input.first() {
-        return env.eval(lisp)
-    }
-    bail!("Bad input {:?}", input);
-}
-
-fn read_lisp(input: &[Value], env: &mut Evaluator) -> Result<Value> {
+fn read_lisp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let Some(Value::Expr(Edn::Str(lisp))) = input.first() {
         let edn = Edn::from_str(&lisp)?;
         return Ok(Value::Expr(edn))
@@ -113,7 +96,6 @@ pub fn core() -> HashMap<String, Value> {
         str!("cons")       => wrap(cons),
         str!("car")        => wrap(car),
         str!("cdr")        => wrap(cdr),
-        str!("eval")       => wrap(eval_lisp),
         str!("read-str")   => wrap(read_lisp),
         str!("slurp")      => wrap(slurp),
         str!("println")    => wrap(print_line),
