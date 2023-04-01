@@ -72,3 +72,4 @@ A list of what is done
 - read
 - slurp
 - println
+- dbg

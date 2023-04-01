@@ -154,8 +154,19 @@ fn print_line(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let Some(arg) = input.first() {
         match arg {
             Value::Native(_) => println!("#native"),
-            Value::Lambda(l) => println!("{:?}", l),
+            Value::Lambda(_) => println!("#lambda"),
             Value::Expr(e) => println!("{}", e.to_string()),
+        }
+    }
+    Ok(Value::Expr(Edn::Nil))
+}
+
+fn dbg_line(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let Some(arg) = input.first() {
+        match arg {
+            Value::Native(_) => println!("#native"),
+            Value::Lambda(l) => println!("{:?}", l),
+            Value::Expr(e) => println!("{:?}", e),
         }
     }
     Ok(Value::Expr(Edn::Nil))
@@ -231,6 +242,7 @@ pub fn core() -> HashMap<String, Value> {
         str!("read")       => wrap(read_lisp),
         str!("slurp")      => wrap(slurp),
         str!("println")    => wrap(print_line),
+        str!("dbg")        => wrap(dbg_line),
         str!("str")        => wrap(str_append),
         str!("=")          => wrap(equals_edn),
     }

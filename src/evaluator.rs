@@ -44,8 +44,9 @@ impl Evaluator {
                 let val = self.eval(map)?;
                 if let Value::Expr(Edn::Map(map)) = val {
                     let btree = map.to_map();
-                    let res = btree.get(key).unwrap_or(&Edn::Nil);
-                    return Ok(Value::Expr(res.clone()));
+                    let val = btree.get(key).unwrap_or(&Edn::Nil);
+                    let res = self.eval(val)?;
+                    return Ok(res);
                 }
             }
             // regular function
