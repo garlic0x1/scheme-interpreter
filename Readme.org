@@ -36,9 +36,10 @@ A list of what is done
   Define in global namespace
 - if
   #+begin_src clj
-  (if not-nil? then else)
+  (if pred? then else)
   #+end_src
-  If statement, returns branch
+  If statement, returns branch.
+  nil, false, empty, 0, 0.0, and 0
 - do
   #+begin_src clj
   (do (println "1") (println "2"))

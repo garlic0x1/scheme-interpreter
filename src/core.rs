@@ -141,6 +141,17 @@ fn read_lisp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     bail!("Bad input {:?}", input);
 }
 
+fn equals_edn(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let (Some(Value::Expr(a)), Some(Value::Expr(b))) = (input.get(0), input.get(1)) {
+        if a == b {
+            return Ok(Value::Expr(Edn::Bool(true)));
+        } else {
+            return Ok(Value::Expr(Edn::Bool(false)));
+        }
+    }
+    bail!("Bad input {:?}", input);
+}
+
 fn type_of(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let Some(val) = input.first() {
         return Ok(Value::Expr(Edn::Str(
@@ -148,19 +159,26 @@ fn type_of(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
                 Value::Lambda(_) => str!("Lambda"),
                 Value::Native(_) => str!("Native"),
                 Value::Expr(edn) => match edn {
-                    Edn::Double(_)    => str!("Float"),
-                    Edn::Rational(_)  => str!("Float"),
-                    Edn::Int(_)       => str!("Int"),
-                    Edn::UInt(_)      => str!("Int"),
-                    Edn::List(_)      => str!("List"),
-                    Edn::Vector(_)    => str!("Vec"),
-                    Edn::Map(_)       => str!("Map"),
-                    Edn::Str(_)       => str!("Str"),
-                    Edn::Symbol(_)    => str!("Symbol"),
-                    Edn::Key(_)       => str!("Key"),
-                    Edn::Nil          => str!("Nil"),
-                    _ => str!("Unknown")
-                },
+                    Edn::Tagged(..)  => str!("Tagged"),
+                    Edn::Vector(_)   => str!("Vector"),
+                    Edn::Set(_)      => str!("Set"),
+                    Edn::Map(_)      => str!("Map"),
+                    Edn::List(_)     => str!("List"),
+                    Edn::Key(_)      => str!("Key"),
+                    Edn::Symbol(_)   => str!("Symbol"),
+                    Edn::Str(_)      => str!("Str"),
+                    Edn::Int(_)      => str!("Int"),
+                    Edn::UInt(_)     => str!("Int"),
+                    Edn::Double(_)   => str!("Float"),
+                    Edn::Rational(_) => str!("Rational"),
+                    Edn::Char(_)     => str!("Char"),
+                    Edn::Bool(_)     => str!("Bool"),
+                    Edn::Inst(_)     => str!("Inst"),
+                    Edn::Uuid(_)     => str!("Uuid"),
+                    Edn::Nil         => str!("Nil"),
+                    Edn::Empty       => str!("Empty"),
+                    Edn::NamespacedMap(..) => str!("NamespacedMap"),
+                }
             }
         )));
     }
@@ -170,6 +188,8 @@ fn type_of(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
 pub fn core() -> HashMap<String, Value> {
     let wrap = |it| Value::Native(Native::new(it));
     hashmap! {
+        str!("true") => Value::Expr(Edn::Bool(true)),
+        str!("false") => Value::Expr(Edn::Bool(false)),
         str!("+")          => wrap(add),
         str!("*")          => wrap(multiply),
         str!("/")          => wrap(divide),
@@ -181,5 +201,6 @@ pub fn core() -> HashMap<String, Value> {
         str!("slurp")      => wrap(slurp),
         str!("println")    => wrap(print_line),
         str!("str-append") => wrap(str_append),
+        str!("=")          => wrap(equals_edn),
     }
 }

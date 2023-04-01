@@ -65,12 +65,27 @@ fn def(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
    Ok(Value::Expr(Edn::Nil))
 }
 
+fn is_truthy(val: &Edn) -> bool {
+    match val {
+        Edn::Nil         => false,
+        Edn::Empty       => false,
+        Edn::Bool(bl)    => *bl,
+        Edn::Int(num)    => *num != 0isize,
+        Edn::UInt(num)   => *num != 0usize,
+        Edn::Double(_)   => val.to_float() != Some(0.0),
+        Edn::Rational(_) => val.to_float() != Some(0.0),
+        Edn::Str(s)      => s.as_str() == "",
+        _                => true,
+    }
+}
+
 fn if_statement(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
     if let (Some(pred), Some(then), Some(otherwise)) = (input.get(0), input.get(1), input.get(2)) {
         if let Value::Expr(edn) = env.eval(pred)? {
-            match edn {
-                Edn::Nil => return env.eval(otherwise),
-                _ => return env.eval(then),
+            if is_truthy(&edn) {
+                return env.eval(then);
+            } else {
+                return env.eval(otherwise);
             }
         }
     }

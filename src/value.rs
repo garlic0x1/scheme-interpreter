@@ -16,7 +16,7 @@ impl fmt::Display for Value {
         match self {
             Value::Lambda(l) => write!(f, "{}", l),
             Value::Native(n) => write!(f, "{}", n),
-            Value::Expr(e) => write!(f, "{}", e.to_string()),
+            Value::Expr(e)   => write!(f, "{}", e.to_string()),
         }
     }
 }
