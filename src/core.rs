@@ -74,6 +74,18 @@ fn slurp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     bail!("Bad input {:?}", input);
 }
 
+fn conj(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let (Some(Value::Expr(Edn::Map(a))), Some(Value::Expr(Edn::Map(b)))) = (input.get(0), input.get(1)) {
+        let mut first  = a.clone().to_map();
+        let second = b.clone().to_map();
+        for (key, val) in second {
+            first.insert(key, val);
+        }
+        let new = edn_rs::Map::new(first);
+        return Ok(Value::Expr(Edn::Map(new)));
+    }
+    bail!("Bad input {:?}", input);
+}
 fn cons(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let (Some(car), Some(cdr)) = (input.get(0), input.get(1)) {
         if let (Value::Expr(car), Value::Expr(cdr)) = (car, cdr) {
@@ -194,6 +206,7 @@ pub fn core() -> HashMap<String, Value> {
         str!("*")          => wrap(multiply),
         str!("/")          => wrap(divide),
         str!("type")       => wrap(type_of),
+        str!("conj")       => wrap(conj),
         str!("cons")       => wrap(cons),
         str!("car")        => wrap(car),
         str!("cdr")        => wrap(cdr),

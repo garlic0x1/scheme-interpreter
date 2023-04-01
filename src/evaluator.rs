@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result, bail};
+use anyhow::{Result, bail};
 use edn_rs::{Edn, List};
 use crate::{environment::{Environment, Frame}, value::*};
 
@@ -18,27 +18,37 @@ impl Evaluator {
                     self.env.lambda_assign(args, &lamb.vars);
                     let res = self.eval(&lamb.body);
                     self.env.lambda_pop();
-                    res
+                    return res;
                 },
                 Value::Native(proc) => {
                     let res = (&proc.proc)(args, self);
-                    res
+                    return res;
                 },
-                Value::Expr(sym) => Err(anyhow!("{} is not a function", sym.to_string()))
+                Value::Expr(sym) => bail!("{} is not a function", sym.to_string())
             }
-        } else {
-            Err(anyhow!("{:?} is an empty list", list))
         }
+        bail!("{:?} is an empty list", list)
     }
 
     fn eval_list(&mut self, list: &List) -> Result<Value> {
         if let Some((first, rest)) = list.clone().to_vec().split_first() {
+            // special forms
             if let Edn::Symbol(sym) = first {
                 if let Some(spec) = self.env.get_special(sym) {
                     let res = (&spec.proc)(rest, self);
                     return res;
                 }
             }
+            // clojure style maps
+            if let (Edn::Key(key), Some(map)) = (first, rest.first()) {
+                let val = self.eval(map)?;
+                if let Value::Expr(Edn::Map(map)) = val {
+                    let btree = map.to_map();
+                    let res = btree.get(key).unwrap_or(&Edn::Nil);
+                    return Ok(Value::Expr(res.clone()));
+                }
+            }
+            // regular function
             let new = list.clone().to_vec().iter()
                           .filter_map(|it: &Edn| self.eval(it).ok())
                           .collect::<Vec<Value>>();
@@ -61,16 +71,4 @@ impl Evaluator {
             _ => Ok(Value::Expr(expr.clone()))
         }
     }
-
-    // fn handle_recur(&mut self, list: &edn_rs::List) -> Result<Vec<Value>> {
-    //     let mut rec: Vec<Value>;
-    //     let list = list.clone().to_vec();
-    //     if special(list.first().unwrap()) {
-    //         rec = list.iter().map(|edn: &Edn| Value::Expr(edn.clone())).collect();
-    //         rec[0] = self.eval(list.first().unwrap())?;
-    //     } else {
-    //         rec = list.iter().filter_map(|it: &Edn| self.eval(it).ok()).collect();
-    //     }
-    //     Ok(rec)
-    // }
 }
