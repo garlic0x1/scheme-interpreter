@@ -66,6 +66,15 @@ fn divide(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     bail!("Bad input {:?}", input);
 }
 
+fn modulo(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let (Some(Value::Expr(numer)), Some(Value::Expr(denom))) = (input.get(0), input.get(1)) {
+        return Ok(Value::Expr(Edn::Double(edn_rs::Double::from(
+            numer.to_float().unwrap_or_default() %
+                denom.to_float().unwrap_or_default()))));
+    }
+    bail!("Bad input {:?}", input);
+}
+
 fn slurp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let Some(Value::Expr(Edn::Str(filename))) = input.first() {
         let text = std::fs::read_to_string(filename)?;
@@ -205,15 +214,16 @@ pub fn core() -> HashMap<String, Value> {
         str!("+")          => wrap(add),
         str!("*")          => wrap(multiply),
         str!("/")          => wrap(divide),
+        str!("mod")        => wrap(modulo),
         str!("type")       => wrap(type_of),
         str!("conj")       => wrap(conj),
         str!("cons")       => wrap(cons),
         str!("car")        => wrap(car),
         str!("cdr")        => wrap(cdr),
-        str!("read-str")   => wrap(read_lisp),
+        str!("read")   => wrap(read_lisp),
         str!("slurp")      => wrap(slurp),
         str!("println")    => wrap(print_line),
-        str!("str-append") => wrap(str_append),
+        str!("str")        => wrap(str_append),
         str!("=")          => wrap(equals_edn),
     }
 }

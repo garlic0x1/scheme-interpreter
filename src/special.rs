@@ -74,7 +74,7 @@ fn is_truthy(val: &Edn) -> bool {
         Edn::UInt(num)   => *num != 0usize,
         Edn::Double(_)   => val.to_float() != Some(0.0),
         Edn::Rational(_) => val.to_float() != Some(0.0),
-        Edn::Str(s)      => s.as_str() == "",
+        Edn::Str(s)      => s.as_str() != "",
         _                => true,
     }
 }
