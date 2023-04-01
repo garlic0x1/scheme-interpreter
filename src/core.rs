@@ -75,6 +75,13 @@ fn modulo(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     bail!("Bad input {:?}", input);
 }
 
+fn cast_int(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let Some(Value::Expr(arg)) = input.first() {
+        return Ok(Value::Expr(Edn::Int(arg.to_int().unwrap_or_default())));
+    }
+    bail!("Bad input {:?}", input);
+}
+
 fn slurp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let Some(Value::Expr(Edn::Str(filename))) = input.first() {
         let text = std::fs::read_to_string(filename)?;
@@ -215,12 +222,13 @@ pub fn core() -> HashMap<String, Value> {
         str!("*")          => wrap(multiply),
         str!("/")          => wrap(divide),
         str!("mod")        => wrap(modulo),
+        str!("int")        => wrap(cast_int),
         str!("type")       => wrap(type_of),
         str!("conj")       => wrap(conj),
         str!("cons")       => wrap(cons),
         str!("car")        => wrap(car),
         str!("cdr")        => wrap(cdr),
-        str!("read")   => wrap(read_lisp),
+        str!("read")       => wrap(read_lisp),
         str!("slurp")      => wrap(slurp),
         str!("println")    => wrap(print_line),
         str!("str")        => wrap(str_append),
