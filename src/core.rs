@@ -216,7 +216,7 @@ fn type_of(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
 pub fn core() -> HashMap<String, Value> {
     let wrap = |it| Value::Native(Native::new(it));
     hashmap! {
-        str!("true") => Value::Expr(Edn::Bool(true)),
+        str!("true")  => Value::Expr(Edn::Bool(true)),
         str!("false") => Value::Expr(Edn::Bool(false)),
         str!("+")          => wrap(add),
         str!("*")          => wrap(multiply),

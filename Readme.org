@@ -8,22 +8,28 @@ build from source
 git clone https://github.com/garlic0x1/scheme-interpreter.git
 cd scheme-interpreter
 cargo install --path .
+scheme-interpreter
 #+end_src
 * Usage
 the app evaluates lines from stdin
 
 to run a file, start the repl and use something like this
 #+begin_src clj
-lisp> (eval (read-str (str-append "(do " (slurp "/home/garlic/rust/scheme/test.scm") ")")))
+lisp> (eval (read (str "(do " (slurp "test.scm") ")")))
 #+end_src
 
 if you evaluate the test.scm you will have access to the `load-file` function which does the same as the above expression
 #+begin_src clj
-(load-file  "/home/garlic/rust/scheme/test.scm")
+(load-file "test.scm")
 #+end_src
 * Implemented
 A list of what is done
 ** special forms:
+- eval
+  #+begin_src clj
+  (eval (quote (println {:hi "world"})))
+  #+end_src
+  evaluate Edn as lisp
 - lambda
   #+begin_src clj
   (lambda [x] (println x))
@@ -39,7 +45,7 @@ A list of what is done
   (if pred? then else)
   #+end_src
   If statement, returns branch.
-  nil, false, empty, 0, 0.0, and 0
+  nil, false, 0, "", etc are falsy
 - do
   #+begin_src clj
   (do (println "1") (println "2"))
@@ -51,15 +57,18 @@ A list of what is done
   #+end_src
   Return list without evaluating
 ** native fns:
+- conj
 - cons
 - car
 - cdr
-- eval
-- read-str
-
-  parse string into edn
+- =
+- +
+- *
+- /
+- mod
+- int
+- str
+- type
+- read
 - slurp
-
-  read file to string
 - println
-- str-append
