@@ -1,8 +1,9 @@
 use crate::{value::*, evaluator::Evaluator};
-use anyhow::{anyhow, Result, bail};
+use anyhow::{Result, bail};
 use edn_rs::Edn;
 use maplit::hashmap;
 use std::{collections::HashMap, str::FromStr};
+use std::convert::TryFrom;
 
 #[macro_export]
 macro_rules! str {
@@ -14,13 +15,63 @@ macro_rules! str {
     };
 }
 
+fn add(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    let mut sum_int: i64   = 0;
+    let mut sum_float: f64 = 0.0;
+    for val in input.iter() {
+        if let Value::Expr(edn) = val {
+            match &edn {
+                Edn::UInt(int) => sum_int += i64::try_from(*int)?,
+                Edn::Int(int)  => sum_int += i64::try_from(*int)?,
+                Edn::Double(_)   => sum_float += edn.to_float().unwrap_or_default(),
+                Edn::Rational(_) => sum_float += edn.to_float().unwrap_or_default(),
+                _ => bail!("Bad value {:?}", edn)
+            }
+        }
+    }
+    if sum_float == 0.0 {
+        Ok(Value::Expr(Edn::Int(sum_int as isize)))
+    } else {
+        Ok(Value::Expr(Edn::Double(edn_rs::Double::from(sum_float + sum_int as f64))))
+    }
+}
+
+fn multiply(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    let mut sum_int: i64   = 1;
+    let mut sum_float: f64 = 1.0;
+    for val in input.iter() {
+        if let Value::Expr(edn) = val {
+            match &edn {
+                Edn::UInt(int)   => sum_int   *= i64::try_from(*int)?,
+                Edn::Int(int)    => sum_int   *= i64::try_from(*int)?,
+                Edn::Double(_)   => sum_float *= edn.to_float().unwrap_or_default(),
+                Edn::Rational(_) => sum_float *= edn.to_float().unwrap_or_default(),
+                _ => bail!("Bad value {:?}", edn)
+            }
+        }
+    }
+    if sum_float == 1.0 {
+        Ok(Value::Expr(Edn::Int(sum_int as isize)))
+    } else {
+        Ok(Value::Expr(Edn::Double(edn_rs::Double::from(sum_float * sum_int as f64))))
+    }
+}
+
+fn divide(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let (Some(Value::Expr(numer)), Some(Value::Expr(denom))) = (input.get(0), input.get(1)) {
+        return Ok(Value::Expr(Edn::Double(edn_rs::Double::from(
+            numer.to_float().unwrap_or_default() /
+                denom.to_float().unwrap_or_default()))));
+    }
+    bail!("Bad input {:?}", input);
+}
+
 fn slurp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     if let Some(Value::Expr(Edn::Str(filename))) = input.first() {
         let text = std::fs::read_to_string(filename)?;
-        Ok(Value::Expr(Edn::Str(text)))
-    } else {
-        Err(anyhow!("Bad input {:?}", input))
+        return Ok(Value::Expr(Edn::Str(text)));
     }
+    bail!("Bad input {:?}", input);
 }
 
 fn cons(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
@@ -90,9 +141,39 @@ fn read_lisp(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     bail!("Bad input {:?}", input);
 }
 
+fn type_of(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
+    if let Some(val) = input.first() {
+        return Ok(Value::Expr(Edn::Str(
+            match val {
+                Value::Lambda(_) => str!("Lambda"),
+                Value::Native(_) => str!("Native"),
+                Value::Expr(edn) => match edn {
+                    Edn::Double(_)    => str!("Float"),
+                    Edn::Rational(_)  => str!("Float"),
+                    Edn::Int(_)       => str!("Int"),
+                    Edn::UInt(_)      => str!("Int"),
+                    Edn::List(_)      => str!("List"),
+                    Edn::Vector(_)    => str!("Vec"),
+                    Edn::Map(_)       => str!("Map"),
+                    Edn::Str(_)       => str!("Str"),
+                    Edn::Symbol(_)    => str!("Symbol"),
+                    Edn::Key(_)       => str!("Key"),
+                    Edn::Nil          => str!("Nil"),
+                    _ => str!("Unknown")
+                },
+            }
+        )));
+    }
+    bail!("Bad input {:?}", input);
+}
+
 pub fn core() -> HashMap<String, Value> {
     let wrap = |it| Value::Native(Native::new(it));
     hashmap! {
+        str!("+")          => wrap(add),
+        str!("*")          => wrap(multiply),
+        str!("/")          => wrap(divide),
+        str!("type")       => wrap(type_of),
         str!("cons")       => wrap(cons),
         str!("car")        => wrap(car),
         str!("cdr")        => wrap(cdr),
