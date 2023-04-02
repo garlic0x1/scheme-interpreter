@@ -14,6 +14,13 @@
 ;; hello world function
 (def hi-world (λ [name] (println (str "hello " name))))
 
+;; map values are evaluated each time they are used
+(println {:a (+ 2/3 5.0)})
+;; {:a (+, 2/3, 5.0, ), }
+(:a {:a (+ 2/3 5.0)})
+;; => 5.666666666666667
+
+
 ;; math
 (+ 1 2 3 4)
 ;; => 10
@@ -25,6 +32,8 @@
 ;; => 1.5
 (mod 3 2)
 ;; => 1.0
+(int 8/3)
+;; => 3
 
 ;; loading file returns "return value"
 ;; empty string is falsy

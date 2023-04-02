@@ -11,17 +11,16 @@ cargo install --path .
 scheme-interpreter
 #+end_src
 * Usage
-the app evaluates lines from stdin
+Commands:
+  eval  evaluate a string
+  run   run a file as a program
+  repl  start a REPL
+  help  Print this message or the help of the given subcommand(s)
 
-to run a file, start the repl and use something like this
-#+begin_src clj
-lisp> (eval (read (str "(do " (slurp "test.scm") ")")))
-#+end_src
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 
-if you evaluate the test.scm you will have access to the `load-file` function which does the same as the above expression
-#+begin_src clj
-(load-file "test.scm")
-#+end_src
 * Implemented
 A list of what is done
 ** special forms:

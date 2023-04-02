@@ -15,6 +15,30 @@ macro_rules! str {
     };
 }
 
+pub fn core() -> HashMap<String, Value> {
+    let wrap = |it| Value::Native(Native::new(it));
+    hashmap! {
+        str!("true")  => Value::Expr(Edn::Bool(true)),
+        str!("false") => Value::Expr(Edn::Bool(false)),
+        str!("+")          => wrap(add),
+        str!("*")          => wrap(multiply),
+        str!("/")          => wrap(divide),
+        str!("mod")        => wrap(modulo),
+        str!("int")        => wrap(cast_int),
+        str!("type")       => wrap(type_of),
+        str!("conj")       => wrap(conj),
+        str!("cons")       => wrap(cons),
+        str!("car")        => wrap(car),
+        str!("cdr")        => wrap(cdr),
+        str!("read")       => wrap(read_lisp),
+        str!("slurp")      => wrap(slurp),
+        str!("println")    => wrap(print_line),
+        str!("dbg")        => wrap(dbg_line),
+        str!("str")        => wrap(str_append),
+        str!("=")          => wrap(equals_edn),
+    }
+}
+
 fn add(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
     let mut sum_int: i64   = 0;
     let mut sum_float: f64 = 0.0;
@@ -222,28 +246,4 @@ fn type_of(input: &[Value], _env: &mut Evaluator) -> Result<Value> {
         )));
     }
     bail!("Bad input {:?}", input);
-}
-
-pub fn core() -> HashMap<String, Value> {
-    let wrap = |it| Value::Native(Native::new(it));
-    hashmap! {
-        str!("true")  => Value::Expr(Edn::Bool(true)),
-        str!("false") => Value::Expr(Edn::Bool(false)),
-        str!("+")          => wrap(add),
-        str!("*")          => wrap(multiply),
-        str!("/")          => wrap(divide),
-        str!("mod")        => wrap(modulo),
-        str!("int")        => wrap(cast_int),
-        str!("type")       => wrap(type_of),
-        str!("conj")       => wrap(conj),
-        str!("cons")       => wrap(cons),
-        str!("car")        => wrap(car),
-        str!("cdr")        => wrap(cdr),
-        str!("read")       => wrap(read_lisp),
-        str!("slurp")      => wrap(slurp),
-        str!("println")    => wrap(print_line),
-        str!("dbg")        => wrap(dbg_line),
-        str!("str")        => wrap(str_append),
-        str!("=")          => wrap(equals_edn),
-    }
 }

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt};
+use std::{collections::HashMap, fmt, str::FromStr};
 
 use anyhow::{Result, anyhow, bail};
 use edn_rs::Edn;
@@ -34,6 +34,7 @@ pub fn special_forms() -> HashMap<String, Special> {
         str!("do")     => wrap(progn),
         str!("quote")  => wrap(quote),
         str!("eval")   => wrap(eval_lisp),
+        str!("load")   => wrap(load_file),
     }
 }
 
@@ -114,4 +115,12 @@ fn eval_lisp(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
         }
     }
     bail!("Bad input {:?}", input);
+}
+
+fn load_file(input: &[Edn], env: &mut Evaluator) -> Result<Value> {
+    if let Some(Edn::Str(filename)) = input.first() {
+        let lisp = format!("(eval (read (str \"(do \" (slurp \"{}\") \" )\")))", filename);
+        return env.eval(&Edn::from_str(&lisp)?);
+    }
+    bail!("bad input")
 }
