@@ -5,7 +5,7 @@ pub mod environment;
 pub mod macros;
 pub mod evaluator;
 pub mod parser;
-use anyhow::Result;
+use anyhow::{Result, bail};
 use evaluator::*;
 use crate::core::core;
 use edn_rs::{self, Edn};
@@ -47,8 +47,15 @@ fn repl() -> Result<()> {
             break;
         }
 
-        let edn = Edn::from_str(&line)?;
-        println!(";; => {}", eval.eval(&edn)?);
+        match Edn::from_str(&line) {
+            Ok(edn) => {
+                match eval.eval(&edn) {
+                    Ok(res) => println!(";; => {}", res),
+                    Err(err) => println!("{}", err),
+                }
+            },
+            Err(err) => println!("{}", err),
+        };
     }
 
     Ok(())
@@ -64,7 +71,10 @@ fn eval(lisp: &str) -> Result<()> {
 fn run(filename: &str) -> Result<()> {
     let mut eval = Evaluator::from_core(core());
     let lisp = format!("(load \"{}\")", filename);
-    eval.eval(&Edn::from_str(&lisp)?)?;
+    match eval.eval(&Edn::from_str(&lisp)?) {
+        Ok(res) => println!(";; => {}", res),
+        Err(err) => bail!(err),
+    }
     Ok(())
 }
 

@@ -24,13 +24,18 @@ Options:
 #+end_src
 
 * Implemented
-A list of what is done
+A list of what is done (not exhaustive)
 ** special forms:
 - eval
   #+begin_src clj
   (eval (quote (println {:hi "world"})))
   #+end_src
   evaluate Edn as lisp
+- load
+  #+begin_src clj
+  (load "test.scm")
+  #+end_src
+  Evaluate a file
 - lambda
   #+begin_src clj
   (lambda [x] (println x))
