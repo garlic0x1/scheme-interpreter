@@ -11,6 +11,7 @@ cargo install --path .
 scheme-interpreter
 #+end_src
 * Usage
+#+begin_src
 Commands:
   eval  evaluate a string
   run   run a file as a program
@@ -20,6 +21,7 @@ Commands:
 Options:
   -h, --help     Print help
   -V, --version  Print version
+#+end_src
 
 * Implemented
 A list of what is done
